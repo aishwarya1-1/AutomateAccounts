@@ -74,7 +74,7 @@ function updateStepStatus(stepNumber, status) {
 }
 
 // Reset all steps to waiting
-function resetSteps() {
+function resetSteps() { 
     updateStepStatus(1, 'waiting');
     updateStepStatus(2, 'waiting');
     updateStepStatus(3, 'waiting');
@@ -168,7 +168,26 @@ if (uploadForm) {
             // Step 3: Process receipt
             updateStepStatus(3, 'processing');
             
-          
+            const processResponse = await fetch('/api/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ file_id: currentFileId })
+            });
+            
+            const processResult = await processResponse.json();
+            
+            if (!processResponse.ok || !processResult.success) {
+                throw new Error(processResult.error || 'Failed to process receipt');
+            }
+            
+            updateStepStatus(3, 'success');
+            showNotification('Processing Complete', 'Receipt data extracted successfully', 'success');
+            
+            // Save the receipt ID
+            currentReceiptId = processResult.receipt_id;
+   
             
         } catch (error) {
             console.error('Processing error:', error);
