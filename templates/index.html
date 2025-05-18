@@ -1,0 +1,58 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-12">
+        <div class="card shadow-sm">
+            <div class="card-header bg-dark">
+                <h4 class="mb-0"><i class="fas fa-cloud-upload-alt me-2"></i>Upload Receipt</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-8">
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label for="receiptFile" class="form-label">Select PDF Receipt</label>
+                                <input class="form-control" type="file" id="receiptFile" accept=".pdf" required>
+                                <div class="form-text">Upload a scanned receipt in PDF format</div>
+                            </div>
+                            <div class="d-flex">
+                                <button type="submit" class="btn btn-primary" id="uploadBtn">
+                                    <i class="fas fa-upload me-1"></i> Upload
+                                </button>
+                                <div id="processingSpinner" class="d-none spinner-border text-primary ms-2" role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-dark h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">Processing Steps</h5>
+                                <ul class="list-group list-group-flush bg-dark">
+                                    <li class="list-group-item d-flex justify-content-between align-items-center bg-dark" id="step1">
+                                        <span><i class="fas fa-upload me-2"></i> Upload Receipt</span>
+                                        <span class="badge rounded-pill bg-secondary" id="step1-status">Waiting</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center bg-dark" id="step2">
+                                        <span><i class="fas fa-check-circle me-2"></i> Validate PDF</span>
+                                        <span class="badge rounded-pill bg-secondary" id="step2-status">Waiting</span>
+                                    </li>
+                                    <li class="list-group-item d-flex justify-content-between align-items-center bg-dark" id="step3">
+                                        <span><i class="fas fa-brain me-2"></i> Extract Data</span>
+                                        <span class="badge rounded-pill bg-secondary" id="step3-status">Waiting</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+

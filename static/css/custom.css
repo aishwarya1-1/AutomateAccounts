@@ -1,0 +1,67 @@
+/* Additional custom styles beyond Bootstrap */
+
+/* Card hover effect */
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.3) !important;
+}
+
+/* Step indicators */
+#step1.active, #step2.active, #step3.active {
+    font-weight: bold;
+}
+
+/* Processing spinner */
+.processing-status {
+    height: 20px;
+    width: 20px;
+}
+
+
+/* Page container */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.container {
+    flex: 1;
+}
+
+/* File input customization */
+.form-control:focus {
+    border-color: #6c757d;
+    box-shadow: 0 0 0 0.25rem rgba(108, 117, 125, 0.25);
+}
+
+/* Better toast styling */
+.toast {
+    background-color: #2c2c2c;
+}
+
+/* Upload area styling */
+#uploadForm {
+    padding: 1rem;
+    border-radius: 0.25rem;
+}
+
+/* Loading animation */
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}
+
+.loading {
+    animation: pulse 1.5s infinite;
+}
