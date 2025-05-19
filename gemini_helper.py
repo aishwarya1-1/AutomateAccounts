@@ -41,8 +41,8 @@ def extract_receipt_data_from_text(text):
         
         Return a JSON object with the following fields:
         - merchant_name: the store or vendor name
-        - total_amount: the total amount paid (numeric value only)
-        - purchased_at: the purchase date in YYYY-MM-DD format
+        - total_amount: the total amount paid (numeric value only) or total bill value or grand total
+        - purchased_at: the purchase date in YYYY-MM-DD format,this is also referred as Arrival
         - receipt_number: receipt or transaction number
         - payment_method: method of payment (credit card, cash, etc.)
         - tax_amount: tax amount if available

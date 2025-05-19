@@ -74,11 +74,11 @@ function updateStepStatus(stepNumber, status) {
 }
 
 // Reset all steps to waiting
-function resetSteps() { 
+function resetSteps() {
     updateStepStatus(1, 'waiting');
     updateStepStatus(2, 'waiting');
     updateStepStatus(3, 'waiting');
-  
+    document.getElementById('processingResults').style.display = 'none';
 }
 
 // Handle form submission
@@ -187,7 +187,12 @@ if (uploadForm) {
             
             // Save the receipt ID
             currentReceiptId = processResult.receipt_id;
-   
+            
+            // Display extracted data
+            displayReceiptData(processResult.receipt_data);
+            
+            // Reload the receipts table
+            loadReceipts();
             
         } catch (error) {
             console.error('Processing error:', error);
@@ -200,12 +205,159 @@ if (uploadForm) {
     });
 }
 
+// Display extracted receipt data
+function displayReceiptData(receiptData) {
+    const resultsSection = document.getElementById('processingResults');
+    if (!resultsSection) return;
+    
+    // Show the results section
+    resultsSection.style.display = 'block';
+    
+    // Populate receipt details
+    document.getElementById('merchantName').textContent = receiptData.merchant_name || 'Not available';
+    
+    const purchaseDate = receiptData.purchased_at 
+        ? new Date(receiptData.purchased_at).toLocaleDateString()
+        : 'Not available';
+    document.getElementById('purchaseDate').textContent = purchaseDate;
+    
+    document.getElementById('receiptNumber').textContent = receiptData.receipt_number || 'Not available';
+    
+    const formattedAmount = receiptData.total_amount 
+        ? `${receiptData.currency || ''} ${receiptData.total_amount.toFixed(2)}`
+        : 'Not available';
+    document.getElementById('totalAmount').textContent = formattedAmount;
+    
+    document.getElementById('paymentMethod').textContent = receiptData.payment_method || 'Not available';
+    
+    const formattedTax = receiptData.tax_amount 
+        ? `${receiptData.currency || ''} ${receiptData.tax_amount.toFixed(2)}`
+        : 'Not available';
+    document.getElementById('taxAmount').textContent = formattedTax;
+    
+    // Populate items table
+    const itemsTableBody = document.querySelector('#itemsTable tbody');
+    itemsTableBody.innerHTML = '';
+    
+    if (receiptData.items && receiptData.items.length > 0) {
+        receiptData.items.forEach(item => {
+            const row = document.createElement('tr');
+            
+            const descCell = document.createElement('td');
+            descCell.textContent = item.description || 'N/A';
+            
+            const qtyCell = document.createElement('td');
+            qtyCell.textContent = item.quantity || 'N/A';
+            
+            const unitPriceCell = document.createElement('td');
+            unitPriceCell.textContent = item.unit_price 
+                ? `${receiptData.currency || ''} ${item.unit_price.toFixed(2)}`
+                : 'N/A';
+            
+            const totalPriceCell = document.createElement('td');
+            totalPriceCell.textContent = item.total_price 
+                ? `${receiptData.currency || ''} ${item.total_price.toFixed(2)}`
+                : 'N/A';
+            
+            row.appendChild(descCell);
+            row.appendChild(qtyCell);
+            row.appendChild(unitPriceCell);
+            row.appendChild(totalPriceCell);
+            
+            itemsTableBody.appendChild(row);
+        });
+    } else {
+        // No items
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.colSpan = 4;
+        cell.textContent = 'No items found';
+        cell.className = 'text-center';
+        row.appendChild(cell);
+        itemsTableBody.appendChild(row);
+    }
+    
+    // Set up the view receipt button
+    const viewReceiptBtn = document.getElementById('viewReceiptBtn');
+    if (viewReceiptBtn) {
+        viewReceiptBtn.onclick = () => {
+            window.location.href = `/receipt/${currentReceiptId}`;
+        };
+    }
+}
 
+// Load receipts into the table
+async function loadReceipts() {
+    try {
+        const response = await fetch('/api/receipts');
+        const data = await response.json();
+        
+        if (!response.ok || !data.success) {
+            throw new Error(data.error || 'Failed to load receipts');
+        }
+        
+        const receiptsTable = document.querySelector('#receiptsTable tbody');
+        if (!receiptsTable) return;
+        
+        receiptsTable.innerHTML = '';
+        
+        if (data.receipts.length === 0) {
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.colSpan = 5;
+            cell.textContent = 'No receipts found';
+            cell.className = 'text-center';
+            row.appendChild(cell);
+            receiptsTable.appendChild(row);
+            return;
+        }
+        
+        data.receipts.forEach(receipt => {
+            const row = document.createElement('tr');
+            
+            const idCell = document.createElement('td');
+            idCell.textContent = receipt.id;
+            
+            const merchantCell = document.createElement('td');
+            merchantCell.textContent = receipt.merchant_name || 'Unknown';
+            
+            const dateCell = document.createElement('td');
+            dateCell.textContent = receipt.purchased_at 
+                ? new Date(receipt.purchased_at).toLocaleDateString()
+                : 'N/A';
+            
+            const amountCell = document.createElement('td');
+            amountCell.textContent = receipt.total_amount 
+                ? `${receipt.currency || ''} ${receipt.total_amount.toFixed(2)}`
+                : 'N/A';
+            
+            const actionsCell = document.createElement('td');
+            const viewButton = document.createElement('a');
+            viewButton.href = `/receipt/${receipt.id}`;
+            viewButton.className = 'btn btn-sm btn-outline-primary me-2';
+            viewButton.innerHTML = '<i class="fas fa-eye me-1"></i> View';
+            
+            actionsCell.appendChild(viewButton);
+            
+            row.appendChild(idCell);
+            row.appendChild(merchantCell);
+            row.appendChild(dateCell);
+            row.appendChild(amountCell);
+            row.appendChild(actionsCell);
+            
+            receiptsTable.appendChild(row);
+        });
+        
+    } catch (error) {
+        console.error('Error loading receipts:', error);
+        showNotification('Error', 'Failed to load receipts', 'error');
+    }
+}
 
 // Document ready
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize the page
     resetSteps();
     
-
+    // Load existing receipts when the page loads (already in place in the template)
 });

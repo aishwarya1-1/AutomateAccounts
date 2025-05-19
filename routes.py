@@ -18,6 +18,17 @@ def index():
     """Render the main application page."""
     return render_template('index.html')
 
+@app.route('/receipt/<int:receipt_id>')
+def receipt_detail(receipt_id):
+    """Render the receipt detail page."""
+    receipt = Receipt.query.get_or_404(receipt_id)
+    return render_template('receipt_detail.html', receipt=receipt)
+
+@app.route('/receipts')
+def receipts_list():
+    """Render the receipts list page."""
+    receipts = Receipt.query.order_by(Receipt.created_at.desc()).all()
+    return render_template('index.html', receipts=receipts)
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -181,6 +192,37 @@ def process_receipt_api():
     except Exception as e:
         logger.error(f"Database error during processing: {str(e)}")
         db.session.rollback()
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/receipts', methods=['GET'])
+def get_receipts():
+    """API to get all receipts."""
+    try:
+        receipts = Receipt.query.order_by(Receipt.created_at.desc()).all()
+        return jsonify({
+            "success": True,
+            "receipts": [receipt.to_dict() for receipt in receipts]
+        }), 200
+    
+    except Exception as e:
+        logger.error(f"Database error getting receipts: {str(e)}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+@app.route('/api/receipts/<int:receipt_id>', methods=['GET'])
+def get_receipt(receipt_id):
+    """API to get a specific receipt."""
+    try:
+        receipt = Receipt.query.get(receipt_id)
+        if not receipt:
+            return jsonify({"success": False, "error": "Receipt not found"}), 404
+        
+        return jsonify({
+            "success": True,
+            "receipt": receipt.to_dict()
+        }), 200
+    
+    except Exception as e:
+        logger.error(f"Database error getting receipt {receipt_id}: {str(e)}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 # Error handlers
